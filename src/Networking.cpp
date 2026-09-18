@@ -3,8 +3,6 @@
 #include "Persistence_Data.h"
 
 
-// Replace with your network credentials
-
 
 // New Zealand Daylight Saving Time rules
 TimeChangeRule nzDst = { "NZDT", Last, Sun, Sep, 2, 780 };  // Daylight time = UTC + 13 hours
@@ -15,7 +13,6 @@ Timezone TZ_NZ(nzDst, nzStd);
 WiFiUDP Udp;
 const int NTP_PACKET_SIZE = 48;      // NTP time is in the first 48 bytes of message
 byte packetBuffer[NTP_PACKET_SIZE];  // Buffer to hold incoming and outgoing packets
-
 
 
 void Initalize_NewNetwork(){
@@ -187,6 +184,29 @@ time_t getNtpTime() {
   return 0;  // return 0 if unable to get the time
 }
 
+// void WebServerTest(int WebErrorCount) {
+//   Serial.println("Testing webserver status");
 
+//   WiFiClient client;  // Create a WiFiClient object
+//   HTTPClient http;
+//   http.begin(client, "http://localhost/");  // Use the new method with WiFiClient
+//   int httpCode = http.GET();
+//   http.end();
+
+//   if (httpCode != HTTP_CODE_OK) {
+//     Serial.println("Webserver Status: ERROR");
+//     Serial.print("Unexpected HTTP code: ");
+//     Serial.println(httpCode);
+//     WebErrorCount = WebErrorCount + 1;
+//     server.stop();
+//     delay(1000);  // Optional: small delay to ensure the server stops completely
+//     server.begin();
+//     delay(5000);
+//     Serial.println("Webserver restarted");
+
+//   } else {
+//     Serial.println("Webserver Status: OK");
+//   }
+// }
 
 

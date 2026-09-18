@@ -7,7 +7,6 @@ Preferences preferences;
 
 
 
-
 // Doesnt save values to EEPROM due to how the ESP8266 is built.
 // Rewrite with EEPROM libary, https://www.techrm.com/how-to-use-the-eeprom-memory-on-the-nodemcu-esp8266/
 int SaveValue(const char* Key,char* Data, int Data_Size) { // Store Char array to NVM

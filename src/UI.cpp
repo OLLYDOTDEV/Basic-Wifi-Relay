@@ -1,8 +1,6 @@
 #include "UI.h"
 #include "HardwareSerial.h"
 
-
-int CurrentMode = 0;  // Variable to store the current hour in 24-hour format
 int currentMinutes = 0;
 EmbAJAXOutputDriverWebServerClass server(80);
 EmbAJAXOutputDriver driver(&server);
@@ -23,9 +21,6 @@ EmbAJAXRadioGroup<5> Radio_mode("mode", modes);
 EmbAJAXMomentaryButton m_button_Mode_submit("Submit_mode", "Submit mode");  // Timer set
 EmbAJAXMutableSpan status_Mode_submit("mode_status");
 char status_Mode_submit_b[BUFLEN];
-
-
-// Automated
 
 EmbAJAXMomentaryButton m_button_schedule_Set("Set_schedule", "Set Schedule");  // Timer set
 
@@ -425,79 +420,53 @@ MAKE_EmbAJAXPage(
     "    label.style.display = 'none';"
     "    }</script>"));
 
-
-
-void selectMode() {
-
-
-  switch (CurrentMode) {
-    case 1:
-      status_Mode_submit.setValue("<br><h4>Current Mode: Override - Off</h4>", true);
-      break;
-    case 2:
-      status_Mode_submit.setValue("<br><h4>Current Mode: Override - On</h4>", true);
-      break;
-    case 3:
-      status_Mode_submit.setValue("<br><h4>Current Mode: Automatic schedule</h4>", true);
-      break;
-    case 4:
-      status_Mode_submit.setValue("<br><h4>Current Mode: Delayed Timer</h4>", true);
-      break;
-  }
-}
-
 void Initialize_UI(){
 
   // Create Pages
   driver.installPage(&page, "/", updateUI);
   server.begin();
   Serial.println("Webserver started");
+
+
 }
 
 void updateUI() {
-
-// bool schedule[24] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-  
-  // Enabled / disable the slider. Note that you could simply do this inside the loop. However,
-  // placing it here makes the client UI more responsive (try it).
-  // timeractive.setEnabled(timer!= 0);
-
   // Override Display Control - On
 
   // Override Display Control - Off
 
   // Automatic Display Control
 
-  hours_contents.setVisible(CurrentMode == 3);
+  hours_contents.setVisible(G_CurrentMode == 3);
 
-
-  if (m_button_schedule_Set.status() == EmbAJAXMomentaryButton::Pressed) {
-
+ if (m_button_schedule_Set.status() == EmbAJAXMomentaryButton::Pressed) {
 
     Serial.println("Schedule submitted");
 
-    // for (int i = 0; i < 24; i++) {
-    //   schedule[i] = hours[i].isChecked();
-    // }
-    // Serial.println("Schedule updated:");
+    for (int i = 0; i < 24; i++) {
+      G_Timer_Schedule[i] = hours[i].isChecked();
+    }
+    // Serial.println("G_Timer_Schedule updated:");
     // for (int i = 0; i < 24; i++) {
     //   Serial.print("Hour ");
     //   Serial.print(i);
     //   Serial.print(": ");
-    //   Serial.println(schedule[i]);
+    //   Serial.println(G_Timer_Schedule[i]);
     // }
 
-    // saveSchedule();  // Save current schedule
-    Serial.println("Schedule saved to EEPROM");
+    // saveSchedule();  // Save current G_Timer_Schedule
+    // Serial.println("G_Timer_Schedule saved to EEPROM");
   }
-    // Timer  Display Control
+  
+  
+  
+  
+  //Subpage - Timer Display
+  Dropdown_Time.setVisible(G_CurrentMode == 4);
+  input_time_duration.setVisible(G_CurrentMode == 4);
+  m_button_Timer_Set.setVisible(G_CurrentMode == 4);
+  Remaining_Timer.setVisible(G_CurrentMode == 4);
 
-
-  Dropdown_Time.setVisible(CurrentMode == 4);
-  input_time_duration.setVisible(CurrentMode == 4);
-  m_button_Timer_Set.setVisible(CurrentMode == 4);
-  Remaining_Timer.setVisible(CurrentMode == 4);
   // Save timer variables
   if (m_button_Timer_Set.status() == EmbAJAXMomentaryButton::Pressed) {
 
@@ -534,21 +503,37 @@ void updateUI() {
     starttime = millis();  // Save the time when the button was pushed
   }
 
-  if (m_button_Mode_submit.status() == EmbAJAXMomentaryButton::Pressed) {
-    CurrentMode = Radio_mode.selectedOption();
-    Serial.println("Mode updated");
-    // saveMode(1);
 
-    status_Mode_submit.setValue(itoa(CurrentMode, status_Mode_submit_b, 10));
+// Monitor submit function
 
-    selectMode();
+    if (m_button_Mode_submit.status() == EmbAJAXMomentaryButton::Pressed) {
+      G_CurrentMode = Radio_mode.selectedOption();
+      Serial.println("Mode updated");
+      // saveMode(1);
+
+      status_Mode_submit.setValue(itoa(G_CurrentMode, status_Mode_submit_b, 10));
+
+    switch (G_CurrentMode) {
+      case 1:
+        status_Mode_submit.setValue("<br><h4>Current Mode: Override - Off</h4>", true);
+        break;
+      case 2:
+        status_Mode_submit.setValue("<br><h4>Current Mode: Override - On</h4>", true);
+        break;
+      case 3:
+        status_Mode_submit.setValue("<br><h4>Current Mode: Automatic schedule</h4>", true);
+        break;
+      case 4:
+        status_Mode_submit.setValue("<br><h4>Current Mode: Delayed Timer</h4>", true);
+        break;
+    }
   }
-
-  // Serial.println("updateUI Finished");
 }
 
-void timeremaining(){
 
+
+
+void timeremaining(){
   unsigned long seconds_remaining = timerduration / 1000;
   unsigned long minutes_remaining = seconds_remaining / 60;
   unsigned long hours_remaining = minutes_remaining / 60;
@@ -559,6 +544,45 @@ void timeremaining(){
 }
 
 void WebserverSubroutine(){ // Calling fuctions to handles webserver and Memory issues and other soft locks
-driver.loopHook();
+driver.loopHook(); // The webserver call's updateUI() in the background.
 // Serial.println("LoopHook");
 } 
+
+void Mode_1(){
+    if (G_lastmode != G_CurrentMode) {  // execute code only once  on mode switch
+      G_lastmode = G_CurrentMode;
+      Serial.print("Selected mode: ");
+      Serial.println(G_CurrentMode);
+      PinMode_Function(5, LOW);
+    }
+}
+
+void Mode_2(){
+    if (G_lastmode != G_CurrentMode) {  // execute code only once on mode switch
+      G_lastmode = G_CurrentMode;
+      Serial.print("Selected mode: ");
+      Serial.println(G_CurrentMode);
+      PinMode_Function(5, HIGH);
+    }
+
+
+}
+
+void Mode_3(){
+
+    for (int i = 0; i < 24; i++) {  // Update UI for current schedule
+      Set_schedule[i].setValue(G_Timer_Schedule[i] ? "✔️" : "❌");
+    }
+
+
+    timerduration = 0;  // reset timer
+    if (G_Timer_Schedule[currentHour]) {
+      PinMode_Function(5, HIGH);  // Turn relay ON
+    } else {
+      PinMode_Function(5, LOW);  // Turn relay OFF
+    }
+}
+
+void Mode_4(){
+  
+}

@@ -4,7 +4,7 @@
 #include "Networking.h"
 
 void Initalize_Hardware(int RelayPin);
-void PinMode_Function(int pin, bool state,bool relay_status);
+void PinMode_Function(int pin, bool state);
 void TimedRestart(int CurrentMode, int currentMinutes);
 void HeartBeat(int HeartBeat,char* date_strd);
 void GetInput(const char* InputMsg,char* Array); 
