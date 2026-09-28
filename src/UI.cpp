@@ -504,7 +504,7 @@ void updateUI() {
   }
 
 
-// Monitor submit function
+// Monitor submit function and call relay function
 
     if (m_button_Mode_submit.status() == EmbAJAXMomentaryButton::Pressed) {
       G_CurrentMode = Radio_mode.selectedOption();
@@ -512,21 +512,6 @@ void updateUI() {
       // saveMode(1);
 
       status_Mode_submit.setValue(itoa(G_CurrentMode, status_Mode_submit_b, 10));
-
-    switch (G_CurrentMode) {
-      case 1:
-        status_Mode_submit.setValue("<br><h4>Current Mode: Override - Off</h4>", true);
-        break;
-      case 2:
-        status_Mode_submit.setValue("<br><h4>Current Mode: Override - On</h4>", true);
-        break;
-      case 3:
-        status_Mode_submit.setValue("<br><h4>Current Mode: Automatic schedule</h4>", true);
-        break;
-      case 4:
-        status_Mode_submit.setValue("<br><h4>Current Mode: Delayed Timer</h4>", true);
-        break;
-    }
   }
 }
 
@@ -549,40 +534,41 @@ driver.loopHook(); // The webserver call's updateUI() in the background.
 } 
 
 void Mode_1(){
-    if (G_lastmode != G_CurrentMode) {  // execute code only once  on mode switch
-      G_lastmode = G_CurrentMode;
-      Serial.print("Selected mode: ");
-      Serial.println(G_CurrentMode);
-      PinMode_Function(5, LOW);
-    }
+  status_Mode_submit.setValue("<br><h4>Current Mode: Override - Off</h4>", true);
+  if (G_lastmode != G_CurrentMode) {  // execute code only once  on mode switch
+    G_lastmode = G_CurrentMode;
+    Serial.print("Selected mode: ");
+    Serial.println(G_CurrentMode);
+    PinMode_Function(5, LOW);
+  }
 }
 
 void Mode_2(){
-    if (G_lastmode != G_CurrentMode) {  // execute code only once on mode switch
-      G_lastmode = G_CurrentMode;
-      Serial.print("Selected mode: ");
-      Serial.println(G_CurrentMode);
-      PinMode_Function(5, HIGH);
-    }
-
+        status_Mode_submit.setValue("<br><h4>Current Mode: Override - On</h4>", true);
+  if (G_lastmode != G_CurrentMode) {  // execute code only once on mode switch
+    G_lastmode = G_CurrentMode;
+    Serial.print("Selected mode: ");
+    Serial.println(G_CurrentMode);
+    PinMode_Function(5, HIGH);
+  }
 
 }
 
 void Mode_3(){
+      status_Mode_submit.setValue("<br><h4>Current Mode: Automatic schedule</h4>", true);
+  // for (int i = 0; i < 24; i++) {  // Update UI for current schedule
+  //   Set_schedule[i].setValue(G_Timer_Schedule[i] ? "✔️" : "❌");
+  // }
 
-    for (int i = 0; i < 24; i++) {  // Update UI for current schedule
-      Set_schedule[i].setValue(G_Timer_Schedule[i] ? "✔️" : "❌");
-    }
 
-
-    timerduration = 0;  // reset timer
-    if (G_Timer_Schedule[currentHour]) {
-      PinMode_Function(5, HIGH);  // Turn relay ON
-    } else {
-      PinMode_Function(5, LOW);  // Turn relay OFF
-    }
+  // timerduration = 0;  // reset timer
+  // if (G_Timer_Schedule[currentHour]) {
+  //   PinMode_Function(5, HIGH);  // Turn relay ON
+  // } else {
+  //   PinMode_Function(5, LOW);  // Turn relay OFF
+  // }
 }
 
 void Mode_4(){
-  
+  status_Mode_submit.setValue("<br><h4>Current Mode: Delayed Timer</h4>", true);
 }

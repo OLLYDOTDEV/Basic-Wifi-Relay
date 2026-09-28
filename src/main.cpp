@@ -26,6 +26,7 @@ Initialize_UI();
 
 }
 
+// PinMode_Function digital write is commented out while testing.
 
 void loop() {
 WebserverSubroutine();
@@ -66,7 +67,20 @@ WebserverSubroutine();
 // Relay control
 
 
-
+    switch (G_CurrentMode) {
+      case 1:
+        Mode_1();
+        break;
+      case 2:
+        Mode_2();
+       break;
+      case 3:
+        Mode_3();
+        break;
+      case 4:
+        Mode_4();
+        break;
+    }
 
 
 
