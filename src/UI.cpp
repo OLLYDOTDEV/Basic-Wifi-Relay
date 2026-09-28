@@ -446,16 +446,15 @@ void updateUI() {
     for (int i = 0; i < 24; i++) {
       G_Timer_Schedule[i] = hours[i].isChecked();
     }
-    Serial.println("G_Timer_Schedule updated:");
+    Serial.println("Timer_Schedule array updated :");
     for (int i = 0; i < 24; i++) {
       Serial.print("Hour ");
       Serial.print(i);
       Serial.print(": ");
       Serial.println(G_Timer_Schedule[i]);
     }
-
-    // saveSchedule();  // Save current G_Timer_Schedule
-  }
+    // SaveValue("Schedule", G_Timer_Schedule, sizeof(G_Timer_Schedule));
+    }
   
   
   

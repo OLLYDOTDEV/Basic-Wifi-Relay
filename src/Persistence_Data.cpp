@@ -9,7 +9,7 @@ Preferences preferences;
 
 // Doesnt save values to EEPROM due to how the ESP8266 is built.
 // Rewrite with EEPROM libary, https://www.techrm.com/how-to-use-the-eeprom-memory-on-the-nodemcu-esp8266/
-int SaveValue(const char* Key,char* Data, int Data_Size) { // Store Char array to NVM
+bool SaveValueChar(const char* Key,char* Data, int Data_Size) { // Store Char array to NVM
     Serial.println("Storing Key pair to NVM storage");  
     Serial.print(Key);  
     Serial.print(" : ");  
@@ -26,7 +26,45 @@ int SaveValue(const char* Key,char* Data, int Data_Size) { // Store Char array t
   return true;
 }
 
-int LoadValue(const char* Key,char* Data, int Data_Size) { // Retrieve Char array to NVM
+bool LoadValueChar(const char* Key,char* Data, int Data_Size) { // Retrieve Char array to NVM
+  preferences.begin("ProgramData", true);  // Open namespace "schedule" (read-only)
+  if (preferences.isKey(Key)) {
+    // Load schedule array from flash memory
+    preferences.getBytes(Key, Data,Data_Size);
+    Serial.println("Key pair found and restored");  
+    // Serial.print(Key);  
+    // Serial.print(" : ");  
+    // Serial.println(Data);  // Keep commeted to prevent leaking password on boot.
+  } else {
+    Serial.print("Failed to load key ( ");
+    Serial.print(Key);
+    Serial.println(" ) from EEPROM, key missing\n");
+    preferences.end();  // Close namespace
+    return false;
+  }
+preferences.end();  // Close namespace
+return true;
+}
+
+
+bool SaveValueB(const char* Key,bool* Data, int Data_Size) { // Store bool array to NVM
+    Serial.println("Storing Key pair to NVM storage");  
+    Serial.print(Key);  
+    Serial.print(" : ");  
+    Serial.println(Data); 
+  preferences.begin("ProgramData", false);                          // Open namespace "schedule"
+  preferences.putBytes(Key, Data,Data_Size);  // Save schedule array
+  if(preferences.isKey(Key) == false){
+    preferences.end();
+    Serial.println("Key failed to save");
+    return false;
+  }
+  preferences.end();
+  Serial.println("Key pair saved\n\n\n");
+  return true;
+}
+
+bool LoadValueB(const char* Key,bool* Data, int Data_Size) { // Retrieve bool array to NVM
   preferences.begin("ProgramData", true);  // Open namespace "schedule" (read-only)
   if (preferences.isKey(Key)) {
     // Load schedule array from flash memory
