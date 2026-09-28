@@ -48,7 +48,14 @@ WebserverSubroutine();
 
 // Network connection
 
-// Get time
+// Set current time
+
+
+timestring(G_DateSting);
+
+G_TimeHours = GetHours();
+
+G_TimeMinutes = GetMinutes();
 
 // web server 
 
@@ -57,11 +64,7 @@ WebserverSubroutine();
 
 // checkWiFi(); // 
 
-//TimedRestart(int CurrentMode, int currentMinutes)
-//HeartBeat(G_HeartBeat,G_date_str);
-
-
-
+TimedRestart(G_TimeHours, G_TimeMinutes);
 
 
 // Relay control

@@ -80,7 +80,7 @@ void Initalize_ExistingNetwork(){
   Serial.println("Waiting for sync");
   setSyncProvider(getNtpTime);
   //setSyncInterval(86400);
-  setSyncInterval(60);
+  setSyncInterval(21600);
   Serial.println("Synced\n");
   delay(5000);
   }

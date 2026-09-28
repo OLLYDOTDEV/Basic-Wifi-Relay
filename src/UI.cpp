@@ -431,13 +431,13 @@ void Initialize_UI(){
 }
 
 void updateUI() {
-  // Override Display Control - On
 
-  // Override Display Control - Off
+  // update time UI element
+  Current_time_status.setValue(G_DateSting);
 
   // Automatic Display Control
 
-  hours_contents.setVisible(G_CurrentMode == 3);
+  hours_contents.setVisible(G_CurrentMode == 3); 
 
  if (m_button_schedule_Set.status() == EmbAJAXMomentaryButton::Pressed) {
 
@@ -446,16 +446,15 @@ void updateUI() {
     for (int i = 0; i < 24; i++) {
       G_Timer_Schedule[i] = hours[i].isChecked();
     }
-    // Serial.println("G_Timer_Schedule updated:");
-    // for (int i = 0; i < 24; i++) {
-    //   Serial.print("Hour ");
-    //   Serial.print(i);
-    //   Serial.print(": ");
-    //   Serial.println(G_Timer_Schedule[i]);
-    // }
+    Serial.println("G_Timer_Schedule updated:");
+    for (int i = 0; i < 24; i++) {
+      Serial.print("Hour ");
+      Serial.print(i);
+      Serial.print(": ");
+      Serial.println(G_Timer_Schedule[i]);
+    }
 
     // saveSchedule();  // Save current G_Timer_Schedule
-    // Serial.println("G_Timer_Schedule saved to EEPROM");
   }
   
   

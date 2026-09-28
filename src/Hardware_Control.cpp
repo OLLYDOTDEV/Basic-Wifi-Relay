@@ -2,6 +2,7 @@
 #include "HardwareSerial.h"
 #include <algorithm>
 
+inline int G_relay_status = 0;
 
 void Initalize_Hardware(const int RelayPin){
 
@@ -29,21 +30,12 @@ void PinMode_Function(int pin, bool state) {
 }
 
 
-void TimedRestart(int CurrentMode, int currentMinutes){
-  if (CurrentMode == 11 && currentMinutes == 59) {  // reboot at 11:59 am
+void TimedRestart(int Hour, int Minutes){
+  if (Hour == 11 && Minutes == 59) {  // reboot at 11:59 am
     //pinMode_function(relayPin, LOW);
     Serial.println("Automatic Reboot in 60 seconds");
     delay(1200000);  // ensure wont reboot twice in the same minute
     ESP.restart();   //
-  }
-}
-
-
-void HeartBeat(int HeartBeat,char* date_str){
-  if (millis() - HeartBeat >= 10000) {
-    HeartBeat = millis();
-    Serial.print("HeartBeat: ");
-    Serial.println(date_str);
   }
 }
 
