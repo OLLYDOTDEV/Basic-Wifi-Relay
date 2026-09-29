@@ -453,7 +453,7 @@ void updateUI() {
       Serial.print(": ");
       Serial.println(G_Timer_Schedule[i]);
     }
-    // SaveValue("Schedule", G_Timer_Schedule, sizeof(G_Timer_Schedule));
+    SaveValue_Bool("Schedule", G_Timer_Schedule, sizeof(G_Timer_Schedule));
     }
   
   
@@ -507,10 +507,9 @@ void updateUI() {
     if (m_button_Mode_submit.status() == EmbAJAXMomentaryButton::Pressed) {
       G_CurrentMode = Radio_mode.selectedOption();
       Serial.println("Mode updated");
-      // saveMode(1);
-
+      SaveValue_Int("Mode", G_CurrentMode);
       status_Mode_submit.setValue(itoa(G_CurrentMode, status_Mode_submit_b, 10));
-  }
+    } 
 }
 
 

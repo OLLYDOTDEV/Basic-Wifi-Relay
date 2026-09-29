@@ -11,14 +11,13 @@ void setup() {
 
 Initalize_Hardware(5);
 
-// ClearState();  // Keep commented unless required [will clear set NVM keys]
-Initalize_ExistingNetwork();
+  // ClearState();  // Keep commented unless required [will clear set NVM keys]
+  Initalize_ExistingNetwork();
 
-  // LoadValue(Schedule,G_Timer_Schedule)
-  // LoadValue(Mode,G_CurrentMode) // check functions supports int's
+  // LoadValue("Schedule",G_Timer_Schedule,sizeof(G_Timer_Schedule));
+  LoadValue_Int("Mode",G_CurrentMode); // check functions supports int's
 
-  
-delay(5000);
+  delay(5000);
 
 
 

@@ -9,8 +9,10 @@
 
 #include "HardwareSerial.h"
 
-bool SaveValueChar(const char* Key,char* Data, int Data_Size); 
-bool LoadValueChar(const char* Key,char* Data, int Data_Size);
-bool SaveValueBool(const char* Key,bool* Data, int Data_Size); 
-bool LoadValueBool(const char* Key,bool* Data, int Data_Size);
+bool SaveValue_Char(const char* Key,char* Data, int Data_Size); 
+bool LoadValue_Char(const char* Key,char* Data, int Data_Size);
+bool SaveValue_Bool(const char* Key,bool* Data, int Data_Size); 
+bool LoadValue_Bool(const char* Key,bool* Data, int Data_Size);
+bool SaveValue_Int(const char* Key,int Data); 
+bool LoadValue_Int(const char* Key,int Data);
 void ClearState();

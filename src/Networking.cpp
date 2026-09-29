@@ -27,10 +27,10 @@ void Initalize_NewNetwork(){
 
 
   GetInput("Input WIFI SSID:",WIFI_SSID);
-  SaveValue("WIFI_SSID",WIFI_SSID,sizeof(WIFI_SSID));
+  SaveValue_Char("WIFI_SSID",WIFI_SSID,sizeof(WIFI_SSID));
 
   GetInput("Input WIFI Password:",WIFI_Password);
-  SaveValue("WIFI_Password",WIFI_Password,sizeof(WIFI_SSID));
+  SaveValue_Char("WIFI_Password",WIFI_Password,sizeof(WIFI_SSID));
 
 
 
@@ -49,11 +49,11 @@ void Initalize_ExistingNetwork(){
   char WIFI_Password[100] {};
 
 
-  if (LoadValue("WIFI_SSID",WIFI_SSID,sizeof(WIFI_SSID)) == false || LoadValue("WIFI_Password",WIFI_Password,sizeof(WIFI_SSID)) == false){
+  if (LoadValue_Char("WIFI_SSID",WIFI_SSID,sizeof(WIFI_SSID)) == false || LoadValue_Char("WIFI_Password",WIFI_Password,sizeof(WIFI_SSID)) == false){
     // If the network credentials missing from , setup and then reload the values into the current function.
     Initalize_NewNetwork(); 
-    LoadValue("WIFI_SSID",WIFI_SSID,sizeof(WIFI_SSID));
-    LoadValue("WIFI_Password",WIFI_Password,sizeof(WIFI_SSID));
+    LoadValue_Char("WIFI_SSID",WIFI_SSID,sizeof(WIFI_SSID));
+    LoadValue_Char("WIFI_Password",WIFI_Password,sizeof(WIFI_SSID));
   }
 
   Serial.println("Initializing Wifi connection");
