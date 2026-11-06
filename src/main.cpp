@@ -1,5 +1,6 @@
 #include "Globals.h"
 #include <Arduino.h>
+#include <cstdlib>
 #include "HardwareSerial.h"
 #include "UI.h"
 #include "Networking.h"
@@ -25,7 +26,6 @@ Initialize_UI();
 
 }
 
-// PinMode_Function digital write is commented out while testing.
 
 void loop() {
 WebserverSubroutine();

@@ -2,64 +2,50 @@
 #include "HardwareSerial.h"
 #include "Persistence_Data.h"
 
-
-
 // New Zealand Daylight Saving Time rules
 TimeChangeRule nzDst = { "NZDT", Last, Sun, Sep, 2, 780 };  // Daylight time = UTC + 13 hours
 TimeChangeRule nzStd = { "NZST", Last, Sun, Apr, 3, 720 };  // Standard time = UTC + 12 hours
 Timezone TZ_NZ(nzDst, nzStd);
 
-// Wifi UDP variables 
-WiFiUDP Udp;
-const int NTP_PACKET_SIZE = 48;      // NTP time is in the first 48 bytes of message
-byte packetBuffer[NTP_PACKET_SIZE];  // Buffer to hold incoming and outgoing packets
+// Wifi UDP variables
+NetworkUDP Udp;
+const uint16_t UDP_LOCAL_PORT = 8888;  // NetworkUDP has no localPort(), so keep the port here
+const int NTP_PACKET_SIZE = 48;        // NTP time is in the first 48 bytes of message
+byte packetBuffer[NTP_PACKET_SIZE];    // Buffer to hold incoming and outgoing packets
 
 
-void Initalize_NewNetwork(){
+void Initalize_NewNetwork() {
 
   Serial.println("Wifi credentials missing - Initalizing setup");
 
-  // Serial.println("Size of array:");
-  // Serial.println(sizeof(WIFI_SSID));
-
-  char WIFI_SSID[100] {}; 
+  char WIFI_SSID[100] {};
   char WIFI_Password[100] {};
 
+  GetInput("Input WIFI SSID:", WIFI_SSID);
+  SaveValue_Char("WIFI_SSID", WIFI_SSID, sizeof(WIFI_SSID));
 
-  GetInput("Input WIFI SSID:",WIFI_SSID);
-  SaveValue_Char("WIFI_SSID",WIFI_SSID,sizeof(WIFI_SSID));
-
-  GetInput("Input WIFI Password:",WIFI_Password);
-  SaveValue_Char("WIFI_Password",WIFI_Password,sizeof(WIFI_SSID));
-
-
-
-  // for (uint i = 0; i <= sizeof(WIFI_SSID)/sizeof(WIFI_SSID[0])-1; i++){ // Debug returned valve from GetInput()
-  // Serial.print(i);
-  // Serial.print(" : ");
-  // Serial.println(WIFI_SSID[i]);
-  // }
+  GetInput("Input WIFI Password:", WIFI_Password);
+  SaveValue_Char("WIFI_Password", WIFI_Password, sizeof(WIFI_Password));
 }
 
 
+void Initalize_ExistingNetwork() {
 
-void Initalize_ExistingNetwork(){
-
-  char WIFI_SSID[100] {}; 
+  char WIFI_SSID[100] {};
   char WIFI_Password[100] {};
 
-
-  if (LoadValue_Char("WIFI_SSID",WIFI_SSID,sizeof(WIFI_SSID)) == false || LoadValue_Char("WIFI_Password",WIFI_Password,sizeof(WIFI_SSID)) == false){
-    // If the network credentials missing from , setup and then reload the values into the current function.
-    Initalize_NewNetwork(); 
-    LoadValue_Char("WIFI_SSID",WIFI_SSID,sizeof(WIFI_SSID));
-    LoadValue_Char("WIFI_Password",WIFI_Password,sizeof(WIFI_SSID));
+  if (LoadValue_Char("WIFI_SSID", WIFI_SSID, sizeof(WIFI_SSID)) == false || LoadValue_Char("WIFI_Password", WIFI_Password, sizeof(WIFI_Password)) == false) {
+    // If the network credentials are missing, set up and then reload the values into the current function.
+    Initalize_NewNetwork();
+    LoadValue_Char("WIFI_SSID", WIFI_SSID, sizeof(WIFI_SSID));
+    LoadValue_Char("WIFI_Password", WIFI_Password, sizeof(WIFI_Password));
   }
 
   Serial.println("Initializing Wifi connection");
   WiFi.persistent(false);
+  WiFi.setHostname("Wifi-Relay");  // ESP32: must be set before begin(); no spaces allowed
   WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_Password); // Connect to WiFi
+  WiFi.begin(WIFI_SSID, WIFI_Password);  // Connect to WiFi
   while (WiFi.status() != WL_CONNECTED) {
     Serial.println(".");
     // WiFi.printDiag(Serial); // Debug connection issues
@@ -67,23 +53,21 @@ void Initalize_ExistingNetwork(){
     Serial.println();
   }
 
-
   Serial.println("WiFi connected");
-  WiFi.hostname("Wifi Relay");
-  Serial.print("ESP8266 IP Address: ");
+  Serial.print("ESP32 IP Address: ");
   Serial.println(WiFi.localIP());  // Print the IP address to Serial Monitor
   Serial.println("WiFi status: " + String(WiFi.status()) + "\n");
   Serial.println("Starting UDP");
-  Udp.begin(8888);
+  Udp.begin(UDP_LOCAL_PORT);
   Serial.print("Local port: ");
-  Serial.println(Udp.localPort());
+  Serial.println(UDP_LOCAL_PORT);
   Serial.println("Waiting for sync");
   setSyncProvider(getNtpTime);
   //setSyncInterval(86400);
   setSyncInterval(21600);
   Serial.println("Synced\n");
   delay(5000);
-  }
+}
 
 void checkWiFi() {
   if (WiFi.status() != WL_CONNECTED) {
@@ -110,20 +94,19 @@ void timestring(char* date_str) {
   time_t utc = now();
   time_t local = TZ_NZ.toLocal(utc);
   sprintf(date_str, "%04d-%02d-%02d %02d:%02d", year(local), month(local), day(local), hour(local), minute(local));
- }
+}
 
- int GetHours(){
+int GetHours() {
   time_t utc = now();
   time_t local = TZ_NZ.toLocal(utc);
-  return hour(local);  // Update the current hour variable
- }
+  return hour(local);
+}
 
-
- int GetMinutes(){
+int GetMinutes() {
   time_t utc = now();
   time_t local = TZ_NZ.toLocal(utc);
   return minute(local);
- }
+}
 
 
 // send an NTP request to the time server at the given address
@@ -131,7 +114,6 @@ void sendNTPpacket(IPAddress& address) {
   // set all bytes in the buffer to 0
   memset(packetBuffer, 0, NTP_PACKET_SIZE);
   // Initialize values needed to form NTP request
-  // (see URL above for details on the packets)
   packetBuffer[0] = 0b11100011;  // LI, Version, Mode
   packetBuffer[1] = 0;           // Stratum, or type of clock
   packetBuffer[2] = 6;           // Polling Interval
@@ -141,17 +123,14 @@ void sendNTPpacket(IPAddress& address) {
   packetBuffer[13] = 0x4E;
   packetBuffer[14] = 49;
   packetBuffer[15] = 52;
-  // all NTP fields have been given values, now
-  // you can send a packet requesting a timestamp:
-  Udp.beginPacket(address, 123);  //NTP requests are to port 123
+  // all NTP fields have been given values, now send the request
+  Udp.beginPacket(address, 123);  // NTP requests are to port 123
   Udp.write(packetBuffer, NTP_PACKET_SIZE);
   Udp.endPacket();
 }
 
-// Functions below required for NTB timer server sync
+// Functions below required for NTP time server sync
 time_t getNtpTime() {
-  // Set NTP Server
-  //const char* ntpServer = "nz.pool.ntp.org";
   static const char ntpServerName[] = "nz.pool.ntp.org";
 
   IPAddress ntpServerIP;  // NTP server's ip address
@@ -183,30 +162,3 @@ time_t getNtpTime() {
   Serial.println("No NTP Response :-(");
   return 0;  // return 0 if unable to get the time
 }
-
-// void WebServerTest(int WebErrorCount) {
-//   Serial.println("Testing webserver status");
-
-//   WiFiClient client;  // Create a WiFiClient object
-//   HTTPClient http;
-//   http.begin(client, "http://localhost/");  // Use the new method with WiFiClient
-//   int httpCode = http.GET();
-//   http.end();
-
-//   if (httpCode != HTTP_CODE_OK) {
-//     Serial.println("Webserver Status: ERROR");
-//     Serial.print("Unexpected HTTP code: ");
-//     Serial.println(httpCode);
-//     WebErrorCount = WebErrorCount + 1;
-//     server.stop();
-//     delay(1000);  // Optional: small delay to ensure the server stops completely
-//     server.begin();
-//     delay(5000);
-//     Serial.println("Webserver restarted");
-
-//   } else {
-//     Serial.println("Webserver Status: OK");
-//   }
-// }
-
-

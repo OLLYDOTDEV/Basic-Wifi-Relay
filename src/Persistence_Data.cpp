@@ -1,6 +1,6 @@
 #include <Persistence_Data.h>
 #include "UI.h"
-#include "esp8266_peri.h"
+
 Preferences preferences;
 
 // consider refactoring to a single save and load function with more inputs to control the namescope
@@ -28,8 +28,8 @@ bool LoadValue_Char(const char* Key,char* Data, int Data_Size) { // Retrieve Cha
   if (preferences.isKey(Key)) {
     // Load schedule array from flash memory
     preferences.getBytes(Key, Data,Data_Size);
-    Serial.println("Key pair found and restored");  
-    Serial.print(Key);  
+    Serial.print("Key pair found and restored: ");  
+    Serial.println(Key);  
     // Serial.print(" : ");  
     // Serial.println(Data);  // Keep commented to prevent leaking password on boot.
   } else {

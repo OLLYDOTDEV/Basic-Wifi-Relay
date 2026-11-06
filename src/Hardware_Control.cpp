@@ -9,9 +9,9 @@ void Initalize_Hardware(const int RelayPin){
   pinMode(RelayPin, OUTPUT);        // Set relay pin as output
   PinMode_Function(RelayPin, LOW);  // Initialize relay to off
   Serial.begin(115200);
+	delay(1000);
   while (!Serial) {}; // Wait for setup to be ready
   Serial.println();
-	delay(1000);
 	Serial.println("Serial Port Started \n");
 	Serial.flush();
 	delay(1000);
@@ -24,7 +24,7 @@ void PinMode_Function(int pin, bool state) {
     Serial.print("Pin State: ");
     Serial.println(state);
     //delay(1000);  // delays required to prevent watchdog timer
-    // digitalWrite(pin, state);
+    digitalWrite(pin, state);
     //delay(4000);
   }
 }

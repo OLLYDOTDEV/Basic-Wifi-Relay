@@ -1,8 +1,8 @@
 #pragma once
 
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266HTTPClient.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
 #include <WiFiUdp.h>
 #include <Timezone.h>  // https://github.com/JChristensen/Timezone
 #include <TimeLib.h>
