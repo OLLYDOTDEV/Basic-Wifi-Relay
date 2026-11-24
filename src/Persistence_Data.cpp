@@ -66,8 +66,8 @@ bool LoadValue_Bool(const char* Key,bool* Data, int Data_Size) { // Retrieve Cha
   if (preferences.isKey(Key)) {
     // Load schedule array from flash memory
     preferences.getBytes(Key, Data,Data_Size);
-    Serial.println("Key pair found and restored");  
-    Serial.print(Key);  
+    Serial.print("Key pair found and restored: ");  
+    Serial.println(Key);  
     // Serial.print(" : ");  
     // Serial.println(Data);  // Keep commented to prevent leaking password on boot.
   } else {
@@ -104,8 +104,8 @@ bool LoadValue_Int(const char* Key,int Data) { // Retrieve Char array to NVM
   if (preferences.isKey(Key)) {
     // Load schedule array from flash memory
     preferences.getInt(Key, Data);
-    Serial.println("Key pair found and restored");  
-    Serial.print(Key);  
+    Serial.print("Key pair found and restored: ");  
+    Serial.println(Key);  
     // Serial.print(" : ");  
     // Serial.println(Data);  // Keep commented to prevent leaking password on boot.
   } else {

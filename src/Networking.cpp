@@ -46,6 +46,7 @@ void Initalize_ExistingNetwork() {
   WiFi.setHostname("Wifi-Relay");  // ESP32: must be set before begin(); no spaces allowed
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_Password);  // Connect to WiFi
+  WiFi.setSleep(false);
   while (WiFi.status() != WL_CONNECTED) {
     Serial.println(".");
     // WiFi.printDiag(Serial); // Debug connection issues
@@ -53,7 +54,16 @@ void Initalize_ExistingNetwork() {
     Serial.println();
   }
 
+wifi_power_t p = WiFi.getTxPower();
+Serial.print("TX power: ");
+Serial.print((int)p / 4.0);   // enum value is in units of 0.25 dBm
+Serial.println(" dBm");
+
+
   Serial.println("WiFi connected");
+  Serial.print("Signal strength: ");
+  Serial.print(WiFi.RSSI());
+  Serial.println(" dBm");
   Serial.print("ESP32 IP Address: ");
   Serial.println(WiFi.localIP());  // Print the IP address to Serial Monitor
   Serial.println("WiFi status: " + String(WiFi.status()) + "\n");
@@ -63,9 +73,9 @@ void Initalize_ExistingNetwork() {
   Serial.println(UDP_LOCAL_PORT);
   Serial.println("Waiting for sync");
   setSyncProvider(getNtpTime);
+  Serial.println(timeStatus() == timeSet ? "Synced\n" : "NTP sync failed, will retry\n");
   //setSyncInterval(86400);
   setSyncInterval(21600);
-  Serial.println("Synced\n");
   delay(5000);
 }
 
@@ -108,6 +118,11 @@ int GetMinutes() {
   return minute(local);
 }
 
+int GetSeconds() {
+  time_t utc = now();
+  time_t local = TZ_NZ.toLocal(utc);
+  return second(local);
+}
 
 // send an NTP request to the time server at the given address
 void sendNTPpacket(IPAddress& address) {
@@ -132,33 +147,35 @@ void sendNTPpacket(IPAddress& address) {
 // Functions below required for NTP time server sync
 time_t getNtpTime() {
   static const char ntpServerName[] = "nz.pool.ntp.org";
+  IPAddress ntpServerIP;
 
-  IPAddress ntpServerIP;  // NTP server's ip address
+  for (int attempt = 1; attempt <= 3; attempt++) {
+    while (Udp.parsePacket() > 0) { }  // discard stale packets
+    Serial.println("Transmit NTP Request");
 
-  while (Udp.parsePacket() > 0)
-    ;  // discard any previously received packets
-  Serial.println("Transmit NTP Request");
-  // get a random server from the pool
-  WiFi.hostByName(ntpServerName, ntpServerIP);
-  Serial.print(ntpServerName);
-  Serial.print(": ");
-  Serial.println(ntpServerIP);
-  sendNTPpacket(ntpServerIP);
-  uint32_t beginWait = millis();
-  while (millis() - beginWait < 1500) {
-    int size = Udp.parsePacket();
-    if (size >= NTP_PACKET_SIZE) {
-      Serial.println("Receive NTP Response");
-      Udp.read(packetBuffer, NTP_PACKET_SIZE);  // read packet into the buffer
-      unsigned long secsSince1900;
-      // convert four bytes starting at location 40 to a long integer
-      secsSince1900 = (unsigned long)packetBuffer[40] << 24;
-      secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
-      secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
-      secsSince1900 |= (unsigned long)packetBuffer[43];
-      return secsSince1900 - 2208988800UL;
+    if (WiFi.hostByName(ntpServerName, ntpServerIP) != 1) {
+      Serial.println("NTP DNS lookup failed");
+      continue;
+    }
+    sendNTPpacket(ntpServerIP);
+
+    uint32_t beginWait = millis();
+    while (millis() - beginWait < 1500) {
+      int size = Udp.parsePacket();
+      if (size >= NTP_PACKET_SIZE) {
+        Udp.read(packetBuffer, NTP_PACKET_SIZE);
+        unsigned long secsSince1900 = (unsigned long)packetBuffer[40] << 24
+                                    | (unsigned long)packetBuffer[41] << 16
+                                    | (unsigned long)packetBuffer[42] << 8
+                                    | (unsigned long)packetBuffer[43];
+        Serial.println("Receive NTP Response");
+        setSyncInterval(21600);          // success: normal 6 hour interval
+        return secsSince1900 - 2208988800UL;
+      }
+      delay(10);
     }
   }
   Serial.println("No NTP Response :-(");
-  return 0;  // return 0 if unable to get the time
+  setSyncInterval(60);                   // failure: retry in a minute
+  return 0;
 }

@@ -26,10 +26,11 @@ Initialize_UI();
 
 }
 
+int seconds = 0;
 
 void loop() {
 WebserverSubroutine();
-
+updateUI();
   // Check the webserver is still working and also helps to save CPU cycles
   // if (currentMinutes == 40) {
   //   WebServerTest();
@@ -41,7 +42,14 @@ WebserverSubroutine();
   // }
 
 
+if (millis() - seconds >= 100 ) {
+  Serial.println(seconds);
+  seconds = millis();
+Serial.println("Status ok\n");
 
+Serial.printf("heap %u | min heap %u | largest block %u\n", ESP.getFreeHeap(), ESP.getMinFreeHeap(), ESP.getMaxAllocHeap());
+
+}
 
 
 
@@ -53,8 +61,9 @@ WebserverSubroutine();
 timestring(G_DateSting);
 
 G_TimeHours = GetHours();
-
 G_TimeMinutes = GetMinutes();
+G_TimeSeconds = GetSeconds();
+
 
 // web server 
 
@@ -67,6 +76,7 @@ TimedRestart(G_TimeHours, G_TimeMinutes);
 
 
 // Relay control
+
 
 
     switch (G_CurrentMode) {

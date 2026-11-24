@@ -12,6 +12,7 @@ void checkWiFi(char* ssid, char* password);
 void timestring(char* date_str);
 int GetHours();
 int GetMinutes();
+int GetSeconds();
 void sendNTPpacket(IPAddress& address);
 time_t getNtpTime();
 
