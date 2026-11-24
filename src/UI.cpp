@@ -3,8 +3,8 @@
 
 int currentMinutes = 0;
 EmbAJAXOutputDriverWebServerClass server(80);
-EmbAJAXOutputDriver driver(&server);
-
+// EmbAJAXOutputDriver driver(&server);
+BufferedOutputDriver driver(&server);
 long int starttime = 0;
 int currenttime = 0;
 int timepassed = 0;

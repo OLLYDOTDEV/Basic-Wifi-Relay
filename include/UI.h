@@ -5,6 +5,7 @@
 #include <EmbAJAX.h>
 #include <EmbAJAXScriptedSpan.h>
 #include <Persistence_Data.h>
+#include "BufferedOutputDriver.h"
 
 void updateUI();
 void selectMode();

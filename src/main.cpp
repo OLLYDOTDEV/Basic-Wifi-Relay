@@ -17,20 +17,15 @@ Initalize_Hardware(5);
 
   // LoadValue("Schedule",G_Timer_Schedule,sizeof(G_Timer_Schedule));
   LoadValue_Int("Mode",G_CurrentMode); // check functions supports int's
-
-  delay(5000);
-
-
-
-Initialize_UI();
+  Initialize_UI();
 
 }
 
 int seconds = 0;
 
 void loop() {
-WebserverSubroutine();
-updateUI();
+  WebserverSubroutine();
+
   // Check the webserver is still working and also helps to save CPU cycles
   // if (currentMinutes == 40) {
   //   WebServerTest();
@@ -42,14 +37,12 @@ updateUI();
   // }
 
 
-if (millis() - seconds >= 100 ) {
-  Serial.println(seconds);
-  seconds = millis();
-Serial.println("Status ok\n");
+  if (millis() - seconds >= 1000 ) {
+    Serial.println(seconds);
+    seconds = millis();
+    Serial.println("Status ok\n");
 
-Serial.printf("heap %u | min heap %u | largest block %u\n", ESP.getFreeHeap(), ESP.getMinFreeHeap(), ESP.getMaxAllocHeap());
-
-}
+  }
 
 
 
